@@ -18,37 +18,34 @@ const orderSchema = new mongoose.Schema({
     },
     branch: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Branch",
-        required: true,
+        ref: "Branch"
     },
     items: [{
         id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-            required: true,
+            ref: "Product"
 
         },
         item: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-            required: true,
+            ref: "Product"
         },
-        count: { type: Number, required: true },
+        count: { type: Number },
     },
     ],
     deliveryLocation: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: Number },
+        longitude: { type: Number },
         address: { type: String },
     },
     pickupLocation: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: Number },
+        longitude: { type: Number },
         address: { type: String },
     },
     deliveryPersonLocation: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: Number},
+        longitude: { type: Number },
         address: { type: String },
     },
     status: {
@@ -56,7 +53,7 @@ const orderSchema = new mongoose.Schema({
         enum: ["available", "confirmed", "arriving", "delivered", "cancelled"],
         default: "available",
     },
-    totalPrices: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now },
     udatedAt: { type: Date, default: Date.now },
 });
@@ -65,13 +62,15 @@ async function getNextSequenceValue(sequenceName) {
     const sequenceDocument = await Counter.findOneAndUpdate(
         { name: sequenceName },
         { $inc: { sequence_value: 1 } },
-        { new: true, upset: true }
+        { new: true, upsert: true }
     );
+    console.log("sequence",sequenceDocument);
     return sequenceDocument.sequence_value;
 }
 
 orderSchema.pre("save", async function (next) {
     if (this.isNew) {
+        console.error("Order creation");
         const sequenceValue = await getNextSequenceValue("orderId");
         this.orderId = `ORDR${sequenceValue.toString().padStart(5, "0")}`;
     }

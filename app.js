@@ -31,19 +31,51 @@ const start = async () => {
         });
     app.ready().then(
         () => {
+            console.log("✅ WebSocket Server Ready!");
+
+            if (!app.io) {
+                console.error("❌ WebSocket Plugin Not Loaded!");
+                return;
+            }
+
             app.io.on("connection", (socket) => {
                 console.log("A User Connected")
-                socket.on("joinnRoom", (orderId) => {
-                    socket.joinn(orderId);
-                    console.log(`User Joined room $(orderId)`)
-                })
+                socket.on("joinRoom", (orderId) => {
+                    socket.join(orderId);
+                    console.log(`User Joined room ${orderId}`); // ✅ Correct way
 
+                    console.log(orderId);
+                });
+                // Listen for messages from the client
+                socket.on("message", (data) => {
+                    console.log("Received message:", data);
+
+                    const { orderId, message } = data
+                    console.log(message);
+                    console.log(socket.id);
+                    console.log(`Received message: ${orderId}`);
+
+                    // Send message to ALL clients in the room (including sender)
+                    app.io.to(orderId).emit("message", {
+                        sender: socket.id,
+                        message: message
+                    });
+                });
+                // socket.on('message', (data) => {
+                //     console.log(data);
+                //     const { orderId, message } = data;
+                //     // Broadcast the message to others in the same room
+                //     socket.to(orderId).emit('message', {
+                //         sender: socket.id,
+                //         message: message
+                //     });
+                // });
                 socket.on('disconnect', () => {
                     console.log("User DIsconnected")
                 })
             })
         }
-    )
+    );
 };
 
 
