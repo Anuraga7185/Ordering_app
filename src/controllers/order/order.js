@@ -8,16 +8,16 @@ export const createOrder = async (req, reply) => {
     try {
         const { userId } = req.user;
         const { items, branch, totalPrice } = req.body;
-console.log(userId);
-const branchData = await Branch.findById(branch);
-console.log(branchData);
+        console.log(userId);
+        const branchData = await Branch.findById(branch);
+        console.log(branchData);
         const customerData = await Customer.findById(userId);
         console.log("here");
-    
+
         console.log(customerData);
         if (!customerData) {
             reply.send({ message: "Customer not found" });
-            return ;
+            return;
             // return reply.status(404).send({ message: "Customer not found" });
         }
         console.log("here3");
@@ -26,6 +26,7 @@ console.log(branchData);
             items: items.map((item) => ({
                 id: item.id,
                 item: item.item,
+                name: item.name,
                 count: item.count
             })),
             branch,
@@ -46,7 +47,7 @@ console.log(branchData);
         console.log(newOrder);
         const savedOrder = await newOrder.save();
         console.log("save2");
-         return reply.send(savedOrder);
+        return reply.send(savedOrder);
 
 
     } catch (error) {
@@ -62,23 +63,27 @@ export const confirmOrder = async (req, reply) => {
         console.log("userId");
         const { deliveryPersonLocation } = req.body;
         console.log("deliveryPeronLocation");
-        console.log("Order connfirmation", orderId," ",userId," ",deliveryPersonLocation);
+        console.log("Order connfirmation", orderId, " ", userId, " ", deliveryPersonLocation);
         const deliveryPerson = await DeliveryPartner.findById(userId);
         console.log(deliveryPerson);
         if (!deliveryPerson) {
             console.log("deliveryPerson");
             return reply.status(404).send({ message: "delivery Person not found" });
         }
-        console.log("deliveryPerson found",orderId);
-        const order = await Order.findOne({orderId});
+        console.log("deliveryPerson found", orderId);
+        const order = await Order.findOne({ orderId });
         console.log(order);
         if (!order) {
             return reply.status(404).send({ message: "Order not found" });
         }
-        if (order.status !== 'available') {
+        console.log("Order found", order.status);
+        if (order.status === 'Available') {
+            order.status = 'Confirmed'
+        } else {
             return reply.statuS(404).send({ message: "Order is not available" });
         }
-        order.status = 'confirmed'
+        console.log("Order updated", order.status);
+        order.status = 'Confirmed'
         order.deliveryPartner = userId;
         order.deliveryPersonLocation = {
             latitude: deliveryPersonLocation?.latitude,
@@ -109,7 +114,7 @@ export const udateOrderStatus = async (req, reply) => {
         if (!order) {
             return reply.status(404).send({ message: "Order not found" });
         }
-        if (['cancelled', 'delivered'].includes(order.status)) {
+        if (['Cancelled', 'Delivered'].includes(order.status)) {
             return reply.status(404).send({ message: "Order cannot be updated" });
         }
         if (order.deliveryPartner.toString() !== userId) {
@@ -141,7 +146,7 @@ export const getOrders = async (req, reply) => {
         if (customerId) {
             query.customerId = customerId;
         }
-        console.log("here",query);
+        console.log("here", query);
         if (deliveryPartnerId) {
             query.deliveryPartnerId = deliveryPartnerId;
             query.branch = branchId;

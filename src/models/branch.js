@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Base User Schema
 
 const branchSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: { type: mongoose.Schema.Types.ObjectId, required: true },
     location: {
         latitude: { type: Number },
         longitude: { type: Number },

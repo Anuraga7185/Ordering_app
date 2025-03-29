@@ -26,6 +26,7 @@ const orderSchema = new mongoose.Schema({
             ref: "Product"
 
         },
+        name: { type: String },
         item: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product"
@@ -44,14 +45,14 @@ const orderSchema = new mongoose.Schema({
         address: { type: String },
     },
     deliveryPersonLocation: {
-        latitude: { type: Number},
+        latitude: { type: Number },
         longitude: { type: Number },
         address: { type: String },
     },
     status: {
         type: String,
-        enum: ["available", "confirmed", "arriving", "delivered", "cancelled"],
-        default: "available",
+        enum: ["Available", "Confirmed", "Arriving", "Delivered", "Cancelled"],
+        default: "Available",
     },
     totalPrice: { type: Number, required: true },
     createdAt: { type: Date, default: Date.now },
@@ -64,7 +65,7 @@ async function getNextSequenceValue(sequenceName) {
         { $inc: { sequence_value: 1 } },
         { new: true, upsert: true }
     );
-    console.log("sequence",sequenceDocument);
+    console.log("sequence", sequenceDocument);
     return sequenceDocument.sequence_value;
 }
 
