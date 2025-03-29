@@ -17,7 +17,7 @@ const start = async () => {
         pingTimeout: 5000,
         transports: ["websocket"],
     });
-
+    
     await registerRoutes(app);
     await buildAdminRouter(app);
 
@@ -43,7 +43,6 @@ const start = async () => {
                 socket.on("joinRoom", (orderId) => {
                     socket.join(orderId);
                     console.log(`User Joined room ${orderId}`); // ✅ Correct way
-
                     console.log(orderId);
                 });
                 // Listen for messages from the client
@@ -61,15 +60,7 @@ const start = async () => {
                         message: message
                     });
                 });
-                // socket.on('message', (data) => {
-                //     console.log(data);
-                //     const { orderId, message } = data;
-                //     // Broadcast the message to others in the same room
-                //     socket.to(orderId).emit('message', {
-                //         sender: socket.id,
-                //         message: message
-                //     });
-                // });
+        
                 socket.on('disconnect', () => {
                     console.log("User DIsconnected")
                 })
